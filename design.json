@@ -1,0 +1,40 @@
+{
+  "PageBgType": "image",
+  "PageBgValue": "https://i.redd.it/harry-potter-and-the-chamber-of-secrets-wallpaper-7680x4320-v0-bn9nftlsp8a91.jpg?width=7680&format=pjpg&auto=webp&s=32387069035028a034c5b4a7c6723f8d691aaab7",
+  "BtnNormalType": "color",
+  "BtnNormalValue": "#8212ff",
+  "BtnPressedType": "color",
+  "BtnPressedValue": "#C2545",
+  "BtnTextColor": "#000000",
+  "BtnShape": "10px",
+  "BtnShadow": "soft",
+  "BtnShadowColor": "#000000",
+  "BtnGlowColor": "#00ff33",
+  "BtnFont": "Arial, sans-serif",
+  "SavedFonts": [
+    "Arial, sans-serif",
+    "'Verdana', sans-serif",
+    "'Courier New', monospace",
+    "'Georgia', serif",
+    "'Impact', sans-serif",
+    "'Trebuchet MS', sans-serif",
+    "'Comic Sans MS', cursive",
+    "Arial, sans-serif",
+    "'Verdana', sans-serif",
+    "'Courier New', monospace",
+    "'Georgia', serif",
+    "'Impact', sans-serif",
+    "'Trebuchet MS', sans-serif",
+    "'Comic Sans MS', cursive",
+    "Arial, sans-serif",
+    "'Verdana', sans-serif",
+    "'Courier New', monospace",
+    "'Georgia', serif",
+    "'Impact', sans-serif",
+    "'Trebuchet MS', sans-serif",
+    "'Comic Sans MS', cursive"
+  ],
+  "CustomFontFiles": [
+    "HARRYP__.TTF"
+  ]
+}

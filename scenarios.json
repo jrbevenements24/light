@@ -1,0 +1,71 @@
+[
+  {
+    "Name": "La Coupe de Feu",
+    "UsageCount": 0,
+    "Actions": []
+  },
+  {
+    "Name": "Citrouille chanteuse",
+    "UsageCount": 0,
+    "Actions": []
+  },
+  {
+    "Name": "Les fantome de poudlard",
+    "UsageCount": 1,
+    "Actions": []
+  },
+  {
+    "Name": "Le Bal de Noël",
+    "UsageCount": 0,
+    "Actions": []
+  },
+  {
+    "Name": "Hiver a Poudlard",
+    "UsageCount": 0,
+    "Actions": []
+  },
+  {
+    "Name": "L'Arrivée du Poudlard Express",
+    "UsageCount": 1,
+    "Actions": []
+  },
+  {
+    "Name": "Harry Potter",
+    "UsageCount": 6,
+    "Actions": [
+      {
+        "DelayMs": 0,
+        "Type": "os2l",
+        "CommandName": "test",
+        "Note": 0,
+        "Velocity": 127
+      },
+      {
+        "DelayMs": 5000,
+        "Type": "os2l",
+        "CommandName": "I N I T",
+        "Note": 0,
+        "Velocity": 127
+      },
+      {
+        "DelayMs": 2000,
+        "Type": "midi",
+        "CommandName": "",
+        "Note": 42,
+        "Velocity": 127
+      },
+      {
+        "DelayMs": 2000,
+        "Type": "midi",
+        "CommandName": "",
+        "Note": 46,
+        "Velocity": 127
+      }
+    ]
+  },
+  {
+    "Name": "L'Apparition des Détraqueurs",
+    "UsageCount": 1,
+    "Actions": []
+  }
+]
