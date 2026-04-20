@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Controller - Client</title>
+    <style id="custom-fonts"></style>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+
+        #button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+            max-width: 1200px;
+        }
+
+        .scenario-btn {
+            padding: 20px 40px;
+            font-size: 1.5em;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            transition: transform 0.1s ease-in-out;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+            .scenario-btn:active {
+                transform: scale(0.95);
+            }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            font-size: 2em;
+            font-family: 'Segoe UI', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="button-container"></div>
+
+    <div id="overlay">
+        <h1>🌙 Fin de soirée</h1>
+        <p style="font-size: 0.5em; color: #888;">Le système est verrouillé par l'administrateur.</p>
+    </div>
+
+    <script>
+        const API = '/api/show';
+        let design = {};
+
+        async function init() {
+            await loadDesign();
+            await loadScenarios();
+            setInterval(checkStatus, 2000); // Vérifie la "Fin de soirée"
+            setInterval(sendHeartbeat, 2000); // Signale à l'admin que la tablette est en ligne
+        }
+
+        async function loadDesign() {
+            try {
+                const res = await fetch(`${API}/design`);
+                design = await res.json();
+
+                // Appliquer le fond
+                if (design.pageBgType === 'color') {
+                    document.body.style.background = design.pageBgValue;
+                    document.body.style.backgroundImage = 'none';
+                } else {
+                    document.body.style.backgroundImage = `url('${design.pageBgValue}')`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                }
+
+                // Charger les polices
+                let css = "";
+                if (design.customFontFiles) {
+                    design.customFontFiles.forEach(file => {
+                        const family = file.split('.')[0];
+                        css += `@font-face { font-family: '${family}'; src: url('fonts/${file}'); }\n`;
+                    });
+                }
+                document.getElementById('custom-fonts').innerHTML = css;
+
+            } catch (e) { }
+        }
+
+        async function loadScenarios() {
+            try {
+                const res = await fetch(`${API}/list`);
+                const scenarios = await res.json();
+                const container = document.getElementById('button-container');
+                container.innerHTML = '';
+
+                scenarios.forEach(s => {
+                    const btn = document.createElement('button');
+                    btn.className = 'scenario-btn';
+                    btn.innerText = s.name;
+                    applyNormalStyle(btn);
+
+                    // Effet visuel au clic ou au toucher (tablette)
+                    btn.addEventListener('mousedown', () => applyPressedStyle(btn));
+                    btn.addEventListener('mouseup', () => applyNormalStyle(btn));
+                    btn.addEventListener('mouseleave', () => applyNormalStyle(btn));
+
+                    btn.addEventListener('touchstart', () => applyPressedStyle(btn), { passive: true });
+                    btn.addEventListener('touchend', () => applyNormalStyle(btn));
+
+                    // Lancement instantané du scénario sans compte à rebours
+                    btn.onclick = () => playScenario(s.name);
+                    container.appendChild(btn);
+                });
+            } catch (e) { }
+        }
+
+        function applyNormalStyle(btn) {
+            if (design.btnNormalType === 'image') {
+                btn.style.backgroundImage = `url('${design.btnNormalValue}')`;
+                btn.style.backgroundSize = 'cover';
+                btn.style.backgroundColor = 'transparent';
+            } else {
+                btn.style.background = design.btnNormalValue || '#00ff88';
+                btn.style.backgroundImage = 'none';
+            }
+            applyCommonStyle(btn);
+        }
+
+        function applyPressedStyle(btn) {
+            if (design.btnPressedType === 'image') {
+                btn.style.backgroundImage = `url('${design.btnPressedValue}')`;
+                btn.style.backgroundSize = 'cover';
+                btn.style.backgroundColor = 'transparent';
+            } else {
+                btn.style.background = design.btnPressedValue || '#00cc66';
+                btn.style.backgroundImage = 'none';
+            }
+            applyCommonStyle(btn);
+        }
+
+        function applyCommonStyle(btn) {
+            btn.style.color = design.btnTextColor || '#000000';
+            btn.style.borderRadius = design.btnShape || '10px';
+            btn.style.fontFamily = design.btnFont || 'Arial, sans-serif';
+
+            const shadowColor = design.btnShadowColor || '#000000';
+            const glowColor = design.btnGlowColor || '#00ff88';
+
+            if (design.btnShadow === 'soft') {
+                btn.style.boxShadow = `0 4px 6px ${shadowColor}`;
+                btn.style.border = '2px solid rgba(255,255,255,0.2)';
+            } else if (design.btnShadow === 'hard') {
+                btn.style.boxShadow = `4px 4px 0px ${shadowColor}`;
+                btn.style.border = `2px solid ${shadowColor}`;
+            } else if (design.btnShadow === 'neon') {
+                btn.style.boxShadow = `0 0 15px ${glowColor}`;
+                btn.style.border = `1px solid ${glowColor}`;
+            } else {
+                btn.style.boxShadow = 'none';
+                btn.style.border = '2px solid rgba(255,255,255,0.2)';
+            }
+        }
+
+        async function playScenario(name) {
+            // L'appel part immédiatement vers ton ShowManager.cs
+            await fetch(`${API}/play/${encodeURIComponent(name)}`, { method: 'POST' });
+        }
+
+        async function checkStatus() {
+            try {
+                const res = await fetch(`${API}/status`);
+                const data = await res.json();
+                document.getElementById('overlay').style.display = data.endOfNight ? 'flex' : 'none';
+            } catch (e) { }
+        }
+
+        async function sendHeartbeat() {
+            try { await fetch(`${API}/heartbeat`, { method: 'POST' }); } catch (e) { }
+        }
+
+        init();
+    </script>
+</body>
+</html>

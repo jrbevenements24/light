@@ -1,0 +1,821 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Show Control</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600&display=swap" rel="stylesheet">
+    <style id="custom-fonts-style"></style>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: white;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #1e1e1e;
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00d2ff;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #00d2ff;
+            padding-bottom: 10px;
+        }
+
+        .clock-container {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #888;
+            font-size: 0.9em;
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+        }
+
+        .clock-time {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .menu-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+            color: #aaa;
+            font-weight: 600;
+        }
+
+            .menu-item:hover, .menu-item.active {
+                background: #00d2ff;
+                color: black;
+            }
+
+        .stop-section {
+            margin-top: auto;
+        }
+
+        .btn-stop {
+            background: red;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 0 10px red;
+            animation: pulse 2s infinite;
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+            .section.active {
+                display: block;
+            }
+
+        h2 {
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+            color: #ddd;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        .stat-val {
+            font-size: 30px;
+            font-weight: bold;
+            color: #00ff88;
+            margin: 10px 0;
+        }
+
+        .status-dot {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .dot-green {
+            background: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .dot-orange {
+            background: orange;
+            box-shadow: 0 0 10px orange;
+        }
+
+        .dot-red {
+            background: red;
+            box-shadow: 0 0 10px red;
+        }
+
+        .design-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .design-zone {
+            flex: 1;
+            min-width: 300px;
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+            .design-zone h3 {
+                margin-top: 0;
+                color: #00ff88;
+                border-bottom: 1px solid #333;
+                padding-bottom: 10px;
+            }
+
+        .sub-zone {
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border-left: 3px solid #00d2ff;
+        }
+
+            .sub-zone h4 {
+                margin: 0;
+                color: #ddd;
+                font-size: 14px;
+                text-transform: uppercase;
+            }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            background: #1a1a1a;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 5px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        .preview-box {
+            margin-top: 20px;
+            padding: 40px;
+            border: 1px dashed #555;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .font-manager {
+            margin-top: 10px;
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .font-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px solid #333;
+            font-size: 0.8em;
+        }
+
+        .ranking-list {
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #222;
+            border-radius: 5px;
+        }
+
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+            font-size: 0.9em;
+        }
+
+            .rank-item:first-child {
+                color: gold;
+                font-weight: bold;
+                font-size: 1.1em;
+            }
+
+        .rank-pos {
+            color: #888;
+            width: 30px;
+        }
+
+        .scenar-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .scenar-list, .scenar-editor {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .scenar-list {
+            height: 600px;
+            overflow-y: auto;
+        }
+
+        .scenar-item, .macro-item {
+            background: #333;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .btn-green {
+            background: #00ff88;
+            color: black;
+        }
+
+        .btn-blue {
+            background: #00d2ff;
+            color: black;
+        }
+
+        .btn-red {
+            background: #ff4444;
+            color: white;
+        }
+
+        .piano-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .key {
+            width: 40px;
+            height: 150px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 0 0 5px 5px;
+            margin: 0 2px;
+            cursor: pointer;
+            position: relative;
+            color: black;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+            .key:active, .key.active {
+                background: #ddd;
+                transform: scale(0.98);
+            }
+
+            .key.black {
+                width: 30px;
+                height: 100px;
+                background: black;
+                color: white;
+                position: absolute;
+                margin-left: -17px;
+                z-index: 2;
+                border-radius: 0 0 3px 3px;
+            }
+
+                .key.black:active, .key.black.active {
+                    background: #333;
+                }
+
+        .octave {
+            display: flex;
+            position: relative;
+        }
+
+        .midi-feedback {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .big-note {
+            font-size: 40px;
+            color: #00d2ff;
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="favicon.ico" style="height:30px; vertical-align:middle; margin-right:10px;" onerror="this.style.display='none'">
+            SHOW CTRL
+        </div>
+        <div class="clock-container"><div id="clockTime" class="clock-time">--:--</div><div id="clockDate">-- -- --</div></div>
+        <div class="menu-item active" onclick="showSection('dashboard')">📊 Tableau de Bord</div>
+        <div class="menu-item" onclick="showSection('mobile')">📱 Accès Mobile</div>
+        <div class="menu-item" onclick="showSection('macros')">🎛️ Macros VDJ</div>
+        <div class="menu-item" onclick="showSection('midi')">🎹 Piano MIDI</div>
+        <div class="menu-item" onclick="showSection('scenarios')">🎬 Mes Scénarios</div>
+        <div class="menu-item" onclick="showSection('design')">🎨 Design Public</div>
+        <div class="stop-section">
+            <button id="btnEndOfNight" class="btn-stop" style="background:#4400aa; box-shadow:0 0 10px #4400aa; margin-bottom:10px; animation:none;" onclick="toggleEndOfNight()">🌙 FIN DE SOIRÉE</button>
+            <button class="btn-stop" onclick="stopUrgence()">🛑 STOP URGENCE</button>
+        </div>
+    </div>
+    <div class="content">
+        <div id="dashboard" class="section active">
+            <h2>État du Système</h2>
+            <div class="stats-grid">
+                <div class="stat-card"><div>Sunlite (OS2L)</div><div id="statusSunlite" class="status-dot dot-red"></div><div id="textSunlite">...</div></div>
+                <div class="stat-card"><div>Page Public</div><div id="statusPublic" class="status-dot dot-red"></div><div id="textPublic">Déconnecté</div></div>
+            </div>
+            <h2>Statistiques</h2>
+            <div class="stats-grid">
+                <div class="stat-card"><div>Total Clics</div><div class="stat-val" id="totalClicks">0</div><button onclick="resetStats()" style="background:#444; color:white; border:none; padding:5px; border-radius:3px; cursor:pointer;">Remise à zéro</button></div>
+                <div class="stat-card"><div>Classement Scénarios</div><div id="rankingList" class="ranking-list"><div style="color:#666; font-style:italic;">Aucune donnée</div></div></div>
+            </div>
+        </div>
+
+        <div id="mobile" class="section">
+            <h2>Accès Public / Mobile</h2>
+            <div style="text-align:center; padding: 40px; background:#222; border-radius:10px; max-width:600px; margin: 0 auto; border:1px solid #444;">
+                <p style="font-size:1.2em;">Connectez votre téléphone au même réseau Wi-Fi que cet ordinateur, puis scannez ce code :</p>
+                <div id="qrContainer" style="margin: 30px auto; display:inline-block; padding:20px; background:white; border-radius:10px;">
+                    <img id="qrCodeImg" src="" alt="QR Code" style="display:none; width: 250px; height: 250px;">
+                    <div id="qrLoading" style="color:black; font-weight:bold;">Création du QR Code...</div>
+                </div>
+                <p style="color:#aaa;">Ou tapez cette adresse manuellement dans le navigateur de la tablette :</p>
+                <div id="ipDisplay" style="color:#00ff88; font-size:2em; font-weight:bold; background:#111; padding:10px; border-radius:5px; font-family:monospace;">Recherche en cours...</div>
+            </div>
+        </div>
+
+        <div id="macros" class="section">
+            <h2>Créateur de Macros Virtual DJ</h2>
+            <div class="scenar-container">
+                <div class="scenar-list">
+                    <h3>Mes Macros Sauvegardées</h3>
+                    <div id="macroListContainer">Chargement...</div>
+                    <button class="btn btn-blue" onclick="resetMacroForm()">+ Nouvelle Macro</button>
+                </div>
+                <div class="scenar-editor">
+                    <h3 id="macroFormTitle">Nouvelle Macro</h3>
+                    <label>Nom de la Macro</label>
+                    <input type="text" id="mName" placeholder="Ex: Intro Chanson A">
+
+                    <label>Que voulez-vous faire ?</label>
+                    <select id="mType" onchange="toggleMacroFields()">
+                        <option value="simple">Action Simple (Play, Pause, Stop...)</option>
+                        <option value="load">Charger une Musique</option>
+                    </select>
+
+                    <label>Cible (Platine)</label>
+                    <select id="mDeck" onchange="buildMacroCmd()">
+                        <option value="1">Platine Gauche (Deck 1)</option>
+                        <option value="2">Platine Droite (Deck 2)</option>
+                        <option value="">Platine Active Automatique</option>
+                    </select>
+
+                    <div id="mSimpleGroup">
+                        <label>Action</label>
+                        <select id="mAction" onchange="buildMacroCmd()">
+                            <option value="play_pause">Play / Pause</option>
+                            <option value="play">Play (Forcer)</option>
+                            <option value="stop">Stop (Arrêter et Rembobiner)</option>
+                            <option value="pause">Pause</option>
+                            <option value="unload">Vider la platine (Eject)</option>
+                        </select>
+                    </div>
+
+                    <div id="mLoadGroup" style="display:none;">
+                        <label>Chemin de la musique sur le PC</label>
+                        <input type="text" id="mPath" oninput="buildMacroCmd()" placeholder="C:\Musique\Titre.mp3">
+                    </div>
+
+                    <label style="margin-top:20px; color:#00ff88;">Commande générée (Aperçu) :</label>
+                    <input type="text" id="mCmdFinal" readonly style="background:#000; color:#00ff88; font-family:monospace;">
+
+                    <button class="btn btn-green" style="width:100%; margin-top:20px;" onclick="saveMacro()">SAUVEGARDER LA MACRO</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="midi" class="section">
+            <h2>Testeur MIDI & Programmation</h2>
+            <div class="midi-feedback"><div>Dernière Note Testée :</div><div class="big-note" id="lastNoteDisplay">-</div><div id="lastNoteDetail" style="color:#888;">Cliquez sur une touche...</div></div>
+            <div class="piano-wrapper"><div id="piano" class="piano-container"></div></div>
+        </div>
+
+        <div id="scenarios" class="section">
+            <h2>Gestion des Scénarios</h2>
+            <div class="scenar-container">
+                <div class="scenar-list"><h3>Liste</h3><div id="listContainer">Chargement...</div><button class="btn btn-blue" onclick="resetForm()">+ Nouveau</button></div>
+                <div class="scenar-editor">
+                    <h3 id="formTitle">Édition</h3>
+                    <label>Nom</label><input type="text" id="sName"><br><br>
+                    <label>Actions</label>
+                    <div id="actionsList" style="margin-bottom: 10px;"></div>
+                    <button class="btn" onclick="addAction('os2l')">+ OS2L</button>
+                    <button class="btn" onclick="addAction('midi')">+ MIDI</button>
+                    <button class="btn" onclick="addAction('vdj')">+ VIRTUAL DJ</button>
+                    <button class="btn" onclick="addAction('wait')" style="background:#555; color:white;">+ PAUSE</button>
+                    <br><br>
+                    <button class="btn btn-green" onclick="saveScenario()">ENREGISTRER</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="design" class="section">
+            <h2>Personnalisation Interface Public</h2>
+            <div class="design-container">
+                <div class="design-zone">
+                    <h3>1. Design Page (Fond)</h3>
+                    <label>Type de Fond</label><select id="bgType" onchange="updatePreview()"><option value="color">Couleur Unie</option><option value="image">Image (URL)</option></select>
+                    <label>Valeur (Couleur ou URL)</label><input type="text" id="bgValue" value="#121212" oninput="updatePreview()" placeholder="#000000 ou http://...">
+                </div>
+                <div class="design-zone">
+                    <h3>2. Design Boutons</h3>
+                    <label>Police active</label><select id="btnFont" onchange="updatePreview()"></select>
+                    <div class="font-manager"><small>Uploader une police (.ttf, .otf)</small><div style="display:flex; gap:5px;"><input type="file" id="fontFileInput" accept=".ttf,.otf,.woff"><button class="btn-blue" onclick="uploadFont()">Envoyer</button></div><div id="fontList" style="margin-top:10px;"></div></div>
+                    <div class="sub-zone"><h4>État Normal</h4><label>Type</label><select id="btnNormalType" onchange="updatePreview()"><option value="color">Couleur</option><option value="image">Image</option></select><label>Valeur</label><input type="text" id="btnNormalValue" value="#00ff88" oninput="updatePreview()"></div>
+                    <div class="sub-zone" style="border-left-color: #ff0055;"><h4>État Appuyé</h4><label>Type</label><select id="btnPressedType" onchange="updatePreview()"><option value="color">Couleur</option><option value="image">Image</option></select><label>Valeur</label><input type="text" id="btnPressedValue" value="#00cc66" oninput="updatePreview()"></div>
+                    <label>Couleur Texte</label><input type="color" id="btnTextColor" value="#000000" oninput="updatePreview()">
+                    <label>Forme</label><select id="btnShape" onchange="updatePreview()"><option value="0px">Carré</option><option value="10px">Arrondi</option><option value="50px">Pilule</option></select>
+                    <label>Effet de Bord</label><select id="btnShadow" onchange="updatePreview()"><option value="none">Aucun</option><option value="soft">Ombre Douce</option><option value="hard">Ombre Nette</option><option value="neon">Lueur Néon</option></select>
+                    <div style="display:flex; gap:10px;"><div style="flex:1;"><label>Couleur Ombre</label><input type="color" id="btnShadowColor" value="#000000" oninput="updatePreview()"></div><div style="flex:1;"><label>Couleur Lueur</label><input type="color" id="btnGlowColor" value="#00ff88" oninput="updatePreview()"></div></div>
+                </div>
+            </div>
+            <br><button class="btn btn-green" style="width:100%; font-size:1.2em;" onclick="saveDesign()">SAUVEGARDER LE DESIGN</button>
+            <h3>Aperçu</h3><div id="previewBox" class="preview-box"><button id="previewBtn" style="padding:20px 40px; border:none; font-size:1.5em; cursor:pointer;">TEST CLICK</button></div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api/show';
+        let lastTestedNote = null;
+        let standardFonts = []; let customFonts = [];
+        let allMacros = [];
+
+        setInterval(() => { const now = new Date(); document.getElementById('clockTime').innerText = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }); document.getElementById('clockDate').innerText = now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }); }, 1000);
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(d => d.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(d => d.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            if (id === 'scenarios') loadScenarios();
+            if (id === 'dashboard') loadDashboard();
+            if (id === 'design') loadDesign();
+            if (id === 'midi') generatePiano();
+            if (id === 'macros') { loadMacros(); resetMacroForm(); }
+            if (id === 'mobile') loadMobileQR();
+        }
+
+        // --- GESTION DU QR CODE MOBILE ---
+        async function loadMobileQR() {
+            try {
+                const res = await fetch(`${API}/ip`);
+                const data = await res.json();
+                if (data.ip === "127.0.0.1") {
+                    document.getElementById('ipDisplay').innerText = "Veuillez connecter le PC au Wi-Fi";
+                    document.getElementById('qrLoading').innerText = "Pas de réseau détecté.";
+                } else {
+                    const fullUrl = `http://${data.ip}:5000`;
+                    document.getElementById('ipDisplay').innerText = fullUrl;
+                    document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(fullUrl)}`;
+                    document.getElementById('qrCodeImg').onload = () => {
+                        document.getElementById('qrLoading').style.display = 'none';
+                        document.getElementById('qrCodeImg').style.display = 'block';
+                    };
+                }
+            } catch (e) {
+                document.getElementById('ipDisplay').innerText = "Erreur de connexion";
+            }
+        }
+
+        // --- GESTION DES MACROS VDJ ---
+        async function loadMacros() {
+            try {
+                const res = await fetch(`${API}/macros`);
+                allMacros = await res.json();
+                const div = document.getElementById('macroListContainer');
+                div.innerHTML = '';
+                allMacros.forEach(m => {
+                    div.innerHTML += `<div class="macro-item">
+                            <div><strong style="color:#00d2ff;">${m.name}</strong><br><small style="color:#888;">${m.command}</small></div>
+                            <div style="display:flex; gap:5px;">
+                                <button onclick="editMacro('${m.name.replace(/'/g, "\\'")}')" class="btn-blue" style="padding:5px 10px;" title="Modifier">🖊️</button>
+                                <button onclick="delMacro('${m.name.replace(/'/g, "\\'")}')" class="btn-red" style="padding:5px 10px;" title="Supprimer">🗑️</button>
+                            </div>
+                        </div>`;
+                });
+            } catch (e) { }
+        }
+
+        function resetMacroForm() {
+            document.getElementById('macroFormTitle').innerText = "Nouvelle Macro";
+            document.getElementById('mName').value = "";
+            document.getElementById('mType').value = "simple";
+            document.getElementById('mDeck').value = "1";
+            document.getElementById('mAction').value = "play_pause";
+            document.getElementById('mPath').value = "";
+            toggleMacroFields();
+        }
+
+        function editMacro(name) {
+            const m = allMacros.find(x => x.name === name);
+            if (!m) return;
+            document.getElementById('macroFormTitle').innerText = "Modification de Macro";
+            document.getElementById('mName').value = m.name;
+            let cmd = m.command;
+            let deck = "";
+            if (cmd.startsWith("deck 1 ")) { deck = "1"; cmd = cmd.substring(7); }
+            else if (cmd.startsWith("deck 2 ")) { deck = "2"; cmd = cmd.substring(7); }
+            document.getElementById('mDeck').value = deck;
+            if (cmd.startsWith("load ")) {
+                document.getElementById('mType').value = "load";
+                let pathMatch = cmd.match(/load "(.*)"/);
+                if (pathMatch) document.getElementById('mPath').value = pathMatch[1];
+                else document.getElementById('mPath').value = cmd.substring(5).trim();
+            } else {
+                document.getElementById('mType').value = "simple";
+                document.getElementById('mAction').value = cmd;
+            }
+            toggleMacroFields();
+        }
+
+        function toggleMacroFields() {
+            const isLoad = document.getElementById('mType').value === 'load';
+            document.getElementById('mSimpleGroup').style.display = isLoad ? 'none' : 'block';
+            document.getElementById('mLoadGroup').style.display = isLoad ? 'block' : 'none';
+            buildMacroCmd();
+        }
+
+        function buildMacroCmd() {
+            const type = document.getElementById('mType').value;
+            const deck = document.getElementById('mDeck').value;
+            let cmd = deck ? `deck ${deck} ` : "";
+            if (type === 'simple') {
+                cmd += document.getElementById('mAction').value;
+            } else {
+                let path = document.getElementById('mPath').value.replace(/\\/g, '/');
+                cmd += path ? `load "${path}"` : `load ""`;
+            }
+            document.getElementById('mCmdFinal').value = cmd;
+        }
+
+        async function saveMacro() {
+            const name = document.getElementById('mName').value;
+            const command = document.getElementById('mCmdFinal').value;
+            if (!name || !command) return alert("Nom ou commande manquant !");
+            await fetch(`${API}/macro`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, command: command })
+            });
+            resetMacroForm();
+            loadMacros();
+            alert("Macro enregistrée !");
+        }
+
+        async function delMacro(name) {
+            if (confirm("Supprimer la macro " + name + " ?")) {
+                await fetch(`${API}/macro/${encodeURIComponent(name)}`, { method: 'DELETE' });
+                loadMacros();
+            }
+        }
+        // ------------------------------
+
+        function generatePiano() { const container = document.getElementById('piano'); if (container.innerHTML !== "") return; const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']; for (let oct = 2; oct <= 6; oct++) { const octaveDiv = document.createElement('div'); octaveDiv.className = 'octave'; notes.forEach((n, i) => { const midiNote = oct * 12 + i + 12; const isBlack = n.includes('#'); const key = document.createElement('div'); key.className = `key ${isBlack ? 'black' : 'white'}`; if (!isBlack) key.innerText = `C${oct}`; key.onmousedown = () => playMidiNote(midiNote, `${n}${oct}`); octaveDiv.appendChild(key); }); container.appendChild(octaveDiv); } }
+        async function playMidiNote(note, label) { lastTestedNote = note; document.getElementById('lastNoteDisplay').innerText = `NOTE ${note}`; document.getElementById('lastNoteDetail').innerText = `(${label})`; await fetch(`${API}/testmidi`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ note: note }) }); }
+
+        function moveUp(btn) {
+            const currentDiv = btn.closest('div[data-type]');
+            const previousDiv = currentDiv.previousElementSibling;
+            if (previousDiv) currentDiv.parentNode.insertBefore(currentDiv, previousDiv);
+        }
+
+        function moveDown(btn) {
+            const currentDiv = btn.closest('div[data-type]');
+            const nextDiv = currentDiv.nextElementSibling;
+            if (nextDiv) currentDiv.parentNode.insertBefore(nextDiv, currentDiv);
+        }
+
+        // --- GESTION DES ACTIONS (MINUTES ET SECONDES DIRECTEMENT) ---
+        function addAction(type, data = null) {
+            const div = document.createElement('div');
+            div.style.marginBottom = "8px";
+            div.style.padding = "10px";
+            div.style.background = "#2a2a2a";
+            div.style.border = "1px solid #444";
+            div.style.borderRadius = "5px";
+            div.style.display = "flex";
+            div.style.alignItems = "center";
+            div.style.justifyContent = "space-between";
+            div.dataset.type = type;
+
+            const delayMs = data ? data.delayMs : 0;
+
+            const totalSec = Math.floor(delayMs / 1000);
+            const min = Math.floor(totalSec / 60);
+            const sec = totalSec % 60;
+
+            let typeLabel = type.toUpperCase();
+            if (type === 'wait') typeLabel = 'PAUSE';
+
+            let htmlInputs = `<div style="flex:1;"><b>${typeLabel}</b> | Attente APRÈS:
+                <input type="number" class="delay-m" value="${min}" min="0" style="width:50px; padding:5px; text-align:center;"> m
+                <input type="number" class="delay-s" value="${sec}" min="0" max="59" style="width:50px; padding:5px; text-align:center;"> s
+                `;
+
+            if (type === 'os2l') {
+                const cmd = data ? data.commandName : "";
+                htmlInputs += ` ➔ Cmd: <input type="text" class="cmd" value="${cmd}" style="width:150px">`;
+            } else if (type === 'vdj') {
+                const cmd = data ? data.commandName : "";
+                let options = `<option value="">-- Mode Libre --</option>`;
+                allMacros.forEach(m => options += `<option value='${m.command.replace(/'/g, "&#39;")}'>${m.name}</option>`);
+
+                htmlInputs += ` ➔ Cmd: <select style="width:150px; display:inline-block;" onchange="this.nextElementSibling.value = this.value">
+                                ${options}
+                             </select>
+                             <input type="text" class="cmd" value="${cmd}" placeholder="Commande..." style="width:150px">`;
+            } else if (type === 'midi') {
+                const note = data ? data.note : (lastTestedNote || 1);
+                htmlInputs += ` ➔ Note: <input type="number" class="note" value="${note}" style="width:60px; padding:5px;">`;
+                if (lastTestedNote) htmlInputs += ` <small style="color:#00d2ff;">(Piano)</small>`;
+            } else if (type === 'wait') {
+                htmlInputs += ` <span style="color:#aaa; font-style:italic; margin-left:10px;">(Sera ajoutée après cette pause)</span>`;
+            }
+            htmlInputs += `</div>`;
+
+            let htmlButtons = `<div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display:flex; flex-direction:column; gap:2px;">
+                        <button onclick="moveUp(this)" style="background:#444; border:none; color:white; cursor:pointer; padding:3px 8px; border-radius:3px; font-size:10px;" title="Monter">▲</button>
+                        <button onclick="moveDown(this)" style="background:#444; border:none; color:white; cursor:pointer; padding:3px 8px; border-radius:3px; font-size:10px;" title="Descendre">▼</button>
+                    </div>
+                    <button onclick="this.closest('div[data-type]').remove()" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold; font-size:18px;" title="Supprimer">X</button>
+                </div>`;
+
+            div.innerHTML = htmlInputs + htmlButtons;
+            document.getElementById('actionsList').appendChild(div);
+        }
+
+        async function resetStats() { if (confirm("Remettre à zéro les clics ?")) { await fetch(`${API}/resetstats`, { method: 'POST' }); loadDashboard(); } }
+        async function toggleEndOfNight() { const res = await fetch(`${API}/endofnight`, { method: 'POST' }); const data = await res.json(); updateEndOfNightButton(data.active); }
+        function updateEndOfNightButton(active) { const btn = document.getElementById('btnEndOfNight'); if (active) { btn.innerText = "☀️ DÉVERROUILLER"; btn.style.background = "orange"; btn.style.color = "black"; btn.style.boxShadow = "0 0 10px orange"; } else { btn.innerText = "🌙 FIN DE SOIRÉE"; btn.style.background = "#4400aa"; btn.style.color = "white"; btn.style.boxShadow = "0 0 10px #4400aa"; } }
+        setInterval(async () => { try { const res = await fetch(`${API}/status`); const data = await res.json(); updateEndOfNightButton(data.endOfNight); } catch (e) { } }, 2000);
+        async function loadDashboard() { try { const res = await fetch(`${API}/dashboard`); const data = await res.json(); document.getElementById('totalClicks').innerText = data.totalClicks; const rankList = document.getElementById('rankingList'); rankList.innerHTML = ""; if (data.ranking && data.ranking.length > 0) { data.ranking.forEach((s, idx) => { rankList.innerHTML += `<div class="rank-item"><span class="rank-pos">#${idx + 1}</span> <span>${s.name}</span> <span>${s.count} clics</span></div>`; }); } else { rankList.innerHTML = `<div style="color:#666; font-style:italic;">Aucun scénario</div>`; } document.getElementById('statusSunlite').className = data.sunliteConnected ? "status-dot dot-green" : "status-dot dot-red"; document.getElementById('textSunlite').innerText = data.sunliteConnected ? "OK" : "OFF"; document.getElementById('statusPublic').className = data.publicConnected ? "status-dot dot-green" : "status-dot dot-orange"; document.getElementById('textPublic').innerText = data.publicConnected ? "On" : "Off"; } catch (e) { } }
+        async function loadDesign() { const res = await fetch(`${API}/design`); const d = await res.json(); standardFonts = d.savedFonts || ["Arial, sans-serif"]; customFonts = d.customFontFiles || []; injectCustomFontsCSS(); renderFonts(d.btnFont); document.getElementById('bgType').value = d.pageBgType || 'color'; document.getElementById('bgValue').value = d.pageBgValue || '#121212'; document.getElementById('btnNormalType').value = d.btnNormalType || 'color'; document.getElementById('btnNormalValue').value = d.btnNormalValue || '#00ff88'; document.getElementById('btnPressedType').value = d.btnPressedType || 'color'; document.getElementById('btnPressedValue').value = d.btnPressedValue || '#00cc66'; document.getElementById('btnTextColor').value = d.btnTextColor || '#000000'; document.getElementById('btnShape').value = d.btnShape || '10px'; document.getElementById('btnShadow').value = d.btnShadow || 'none'; document.getElementById('btnShadowColor').value = d.btnShadowColor || '#000000'; document.getElementById('btnGlowColor').value = d.btnGlowColor || '#00ff88'; updatePreview(); }
+        function injectCustomFontsCSS() { let css = ""; customFonts.forEach(file => { const family = file.split('.')[0]; css += `@font-face { font-family: '${family}'; src: url('fonts/${file}'); }\n`; }); document.getElementById('custom-fonts-style').innerHTML = css; }
+        function renderFonts(selectedFont) { const select = document.getElementById('btnFont'); const list = document.getElementById('fontList'); select.innerHTML = ''; list.innerHTML = ''; const grpStd = document.createElement('optgroup'); grpStd.label = "Standards"; standardFonts.forEach(f => { const opt = document.createElement('option'); opt.value = f; opt.innerText = f; grpStd.appendChild(opt); }); select.appendChild(grpStd); if (customFonts.length > 0) { const grpCust = document.createElement('optgroup'); grpCust.label = "Mes Polices"; customFonts.forEach((file, index) => { const family = file.split('.')[0]; const opt = document.createElement('option'); opt.value = family; opt.innerText = family; grpCust.appendChild(opt); const item = document.createElement('div'); item.className = 'font-item'; item.innerHTML = `<span>${file}</span> <span style="color:red; cursor:pointer;" onclick="removeCustomFont(${index})">❌</span>`; list.appendChild(item); }); select.appendChild(grpCust); } if (selectedFont) select.value = selectedFont; }
+        async function uploadFont() { const input = document.getElementById('fontFileInput'); if (input.files.length === 0) return alert("Sélectionnez un fichier !"); const formData = new FormData(); formData.append("file", input.files[0]); try { const res = await fetch(`${API}/upload-font`, { method: 'POST', body: formData }); if (!res.ok) throw new Error("Erreur upload"); const data = await res.json(); if (!customFonts.includes(data.fileName)) { customFonts.push(data.fileName); injectCustomFontsCSS(); renderFonts(data.fileName.split('.')[0]); updatePreview(); } alert("Police installée !"); } catch (e) { alert("Erreur : " + e.message); } }
+        function removeCustomFont(index) { if (!confirm("Supprimer cette police ?")) return; customFonts.splice(index, 1); injectCustomFontsCSS(); renderFonts(); updatePreview(); }
+        const pBtn = document.getElementById('previewBtn'); pBtn.addEventListener('mousedown', () => applyBtnStyle('pressed')); pBtn.addEventListener('mouseup', () => applyBtnStyle('normal')); pBtn.addEventListener('mouseleave', () => applyBtnStyle('normal'));
+        function applyBtnStyle(state) { const type = document.getElementById(state === 'normal' ? 'btnNormalType' : 'btnPressedType').value; const val = document.getElementById(state === 'normal' ? 'btnNormalValue' : 'btnPressedValue').value; if (type === 'image') { pBtn.style.backgroundImage = `url('${val}')`; pBtn.style.backgroundSize = 'cover'; pBtn.style.backgroundColor = 'transparent'; } else { pBtn.style.background = val; pBtn.style.backgroundImage = 'none'; } if (state === 'pressed') pBtn.style.transform = "scale(0.95)"; else pBtn.style.transform = "scale(1)"; }
+        function updatePreview() { const bgType = document.getElementById('bgType').value; const bgVal = document.getElementById('bgValue').value; const box = document.getElementById('previewBox'); if (bgType === 'color') { box.style.background = bgVal; box.style.backgroundImage = 'none'; } else { box.style.backgroundImage = `url('${bgVal}')`; box.style.backgroundSize = 'cover'; } applyBtnStyle('normal'); pBtn.style.color = document.getElementById('btnTextColor').value; pBtn.style.borderRadius = document.getElementById('btnShape').value; pBtn.style.fontFamily = document.getElementById('btnFont').value; const shadow = document.getElementById('btnShadow').value; const shadowColor = document.getElementById('btnShadowColor').value; const glowColor = document.getElementById('btnGlowColor').value; if (shadow === 'soft') { pBtn.style.boxShadow = `0 4px 6px ${shadowColor}`; pBtn.style.border = '2px solid rgba(255,255,255,0.2)'; } else if (shadow === 'hard') { pBtn.style.boxShadow = `4px 4px 0px ${shadowColor}`; pBtn.style.border = `2px solid ${shadowColor}`; } else if (shadow === 'neon') { pBtn.style.boxShadow = `0 0 15px ${glowColor}`; pBtn.style.border = `1px solid ${glowColor}`; } else { pBtn.style.boxShadow = 'none'; pBtn.style.border = '2px solid rgba(255,255,255,0.2)'; } }
+        async function saveDesign() { const data = { pageBgType: document.getElementById('bgType').value, pageBgValue: document.getElementById('bgValue').value, btnNormalType: document.getElementById('btnNormalType').value, btnNormalValue: document.getElementById('btnNormalValue').value, btnPressedType: document.getElementById('btnPressedType').value, btnPressedValue: document.getElementById('btnPressedValue').value, btnTextColor: document.getElementById('btnTextColor').value, btnShape: document.getElementById('btnShape').value, btnShadow: document.getElementById('btnShadow').value, btnShadowColor: document.getElementById('btnShadowColor').value, btnGlowColor: document.getElementById('btnGlowColor').value, btnFont: document.getElementById('btnFont').value, savedFonts: standardFonts, customFontFiles: customFonts }; await fetch(`${API}/design`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); alert("Design sauvegardé !"); }
+
+        setInterval(() => { if (document.getElementById('dashboard').classList.contains('active')) loadDashboard(); }, 2000);
+
+        async function loadScenarios() {
+            await loadMacros();
+            const res = await fetch(`${API}/list`);
+            const list = await res.json();
+            const div = document.getElementById('listContainer');
+            div.innerHTML = '';
+            list.forEach(s => {
+                const safeName = s.name.replace(/'/g, "\\'");
+                const safeJson = JSON.stringify(s).replace(/'/g, "&#39;");
+                div.innerHTML += `<div class="scenar-item">
+                        <span>${s.name} <small>(${s.usageCount})</small></span>
+                        <div>
+                            <button onclick="playS('${safeName}')" class="btn-green" title="Lancer">▶️</button>
+                            <button onclick='editS(${safeJson})' class="btn-blue" title="Modifier">🖊️</button>
+                            <button onclick="delS('${safeName}')" class="btn-red" title="Supprimer">🗑️</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function playS(name) { const res = await fetch(`${API}/play/${encodeURIComponent(name)}`, { method: 'POST' }); if (res.status === 403) alert("Impossible : Fin de soirée active ! Déverrouillez d'abord."); else alert("Scénario lancé !"); }
+        function editS(s) { document.getElementById('sName').value = s.name; document.getElementById('actionsList').innerHTML = ''; s.actions.forEach(a => addAction(a.type, a)); }
+        function resetForm() { document.getElementById('sName').value = ""; document.getElementById('actionsList').innerHTML = ""; }
+
+        async function delS(name) {
+            if (confirm("Supprimer " + name + " ?")) {
+                await fetch(`${API}/delete/${encodeURIComponent(name)}`, { method: 'DELETE' });
+                loadScenarios();
+            }
+        }
+
+        async function saveScenario() {
+            const name = document.getElementById('sName').value;
+            if (!name) { alert("Veuillez donner un nom !"); return; }
+
+            const actions = [];
+            document.querySelectorAll('#actionsList > div').forEach(d => {
+                const m = parseInt(d.querySelector('.delay-m').value) || 0;
+                const s = parseInt(d.querySelector('.delay-s').value) || 0;
+                const delayMs = (m * 60000) + (s * 1000);
+
+                let act = { delayMs: delayMs, type: d.dataset.type, commandName: "", note: 0, velocity: 127 };
+                if (act.type === 'os2l' || act.type === 'vdj') act.commandName = d.querySelector('.cmd').value;
+                else if (act.type === 'midi') act.note = parseInt(d.querySelector('.note').value);
+
+                actions.push(act);
+            });
+
+            await fetch(`${API}/create`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: name, actions: actions }) });
+            alert("Enregistré");
+            loadScenarios();
+            resetForm();
+        }
+
+        async function stopUrgence() { await fetch(`${API}/stop`, { method: 'POST' }); }
+
+        loadMacros().then(() => loadDashboard());
+    </script>
+</body>
+</html>

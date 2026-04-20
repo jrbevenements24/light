@@ -1,0 +1,84 @@
+﻿/* DESIGN SÉPARÉ - THÈME SHOW CONTROL */
+
+body {
+    background-color: #121212; /* Fond très sombre */
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    color: #00d2ff; /* Bleu néon */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 40px;
+}
+
+/* Conteneur des boutons */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Les boutons de scénarios */
+.btn-scenario {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    color: #00ff88; /* Vert fluo */
+    border: 2px solid #00ff88;
+    padding: 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+    .btn-scenario:hover {
+        background: #00ff88;
+        color: #000;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+        transform: translateY(-2px);
+    }
+
+    /* État désactivé (quand un show joue) */
+    .btn-scenario.disabled {
+        opacity: 0.3;
+        pointer-events: none;
+        filter: grayscale(100%);
+    }
+
+/* Le bouton STOP d'urgence */
+.btn-stop {
+    background-color: #ff0000;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 15px red;
+    margin-bottom: 30px;
+    position: fixed; /* Toujours visible */
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+    .btn-stop:active {
+        transform: scale(0.95);
+    }
+
+/* Le Compte à rebours */
+#countdown {
+    font-size: 4rem;
+    color: #ffcc00;
+    font-weight: bold;
+    margin: 20px 0;
+    display: none; /* Caché par défaut */
+}
