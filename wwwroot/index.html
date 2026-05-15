@@ -3,202 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Show Controller - Client</title>
-    <style id="custom-fonts"></style>
+    <title>Show Control - Sélection</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         body {
             margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #121212;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #00d2ff;
+            margin-bottom: 30px;
+        }
+
+        .choice-box {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            transition: 0.5s;
-        }
-
-        #button-container {
-            display: flex;
-            flex-wrap: wrap;
             gap: 20px;
-            justify-content: center;
+        }
+
+        .btn {
             padding: 20px;
-            max-width: 1200px;
-        }
-
-        .scenario-btn {
-            padding: 20px 40px;
-            font-size: 1.5em;
-            cursor: pointer;
+            font-size: 1.2em;
             font-weight: bold;
-            text-align: center;
-            transition: transform 0.1s ease-in-out;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: block;
         }
 
-            .scenario-btn:active {
-                transform: scale(0.95);
+        .btn-admin {
+            background: #00d2ff;
+            color: black;
+        }
+
+            .btn-admin:hover {
+                background: #0099cc;
+                transform: scale(1.02);
             }
 
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            font-size: 2em;
-            font-family: 'Segoe UI', sans-serif;
+        .btn-client {
+            background: #00ff88;
+            color: black;
+        }
+
+            .btn-client:hover {
+                background: #00cc66;
+                transform: scale(1.02);
+            }
+
+        .qr-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+
+        #qrContainer {
+            background: white;
+            padding: 15px;
+            display: inline-block;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        #ipDisplay {
+            font-family: monospace;
+            color: #00ff88;
+            font-size: 1.1em;
+            background: #111;
+            padding: 5px 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div id="button-container"></div>
+    <div class="container">
+        <h1>SHOW CONTROL</h1>
 
-    <div id="overlay">
-        <h1>🌙 Fin de soirée</h1>
-        <p style="font-size: 0.5em; color: #888;">Le système est verrouillé par l'administrateur.</p>
+        <div class="choice-box">
+            <a href="admin.html" class="btn btn-admin">💻 ACCÈS ADMINISTRATEUR</a>
+            <a href="public.html" class="btn btn-client">📱 ACCÈS CLIENT / MOBILE</a>
+        </div>
+
+        <div class="qr-section">
+            <p>Scannez pour l'accès mobile :</p>
+            <div id="qrContainer">
+                <img id="qrCodeImg" src="" alt="QR Code" style="display:none; width: 180px; height: 180px;">
+                <div id="qrLoading" style="color:black; font-weight:bold;">Génération...</div>
+            </div>
+            <p>Ou utilisez l'adresse :<br><span id="ipDisplay">Recherche...</span></p>
+        </div>
     </div>
 
     <script>
-        const API = '/api/show';
-        let design = {};
-
-        async function init() {
-            await loadDesign();
-            await loadScenarios();
-            setInterval(checkStatus, 2000); // Vérifie la "Fin de soirée"
-            setInterval(sendHeartbeat, 2000); // Signale à l'admin que la tablette est en ligne
-        }
-
-        async function loadDesign() {
+        async function loadConnectionInfo() {
             try {
-                const res = await fetch(`${API}/design`);
-                design = await res.json();
-
-                // Appliquer le fond
-                if (design.pageBgType === 'color') {
-                    document.body.style.background = design.pageBgValue;
-                    document.body.style.backgroundImage = 'none';
-                } else {
-                    document.body.style.backgroundImage = `url('${design.pageBgValue}')`;
-                    document.body.style.backgroundSize = 'cover';
-                    document.body.style.backgroundPosition = 'center';
-                }
-
-                // Charger les polices
-                let css = "";
-                if (design.customFontFiles) {
-                    design.customFontFiles.forEach(file => {
-                        const family = file.split('.')[0];
-                        css += `@font-face { font-family: '${family}'; src: url('fonts/${file}'); }\n`;
-                    });
-                }
-                document.getElementById('custom-fonts').innerHTML = css;
-
-            } catch (e) { }
-        }
-
-        async function loadScenarios() {
-            try {
-                const res = await fetch(`${API}/list`);
-                const scenarios = await res.json();
-                const container = document.getElementById('button-container');
-                container.innerHTML = '';
-
-                scenarios.forEach(s => {
-                    const btn = document.createElement('button');
-                    btn.className = 'scenario-btn';
-                    btn.innerText = s.name;
-                    applyNormalStyle(btn);
-
-                    // Effet visuel au clic ou au toucher (tablette)
-                    btn.addEventListener('mousedown', () => applyPressedStyle(btn));
-                    btn.addEventListener('mouseup', () => applyNormalStyle(btn));
-                    btn.addEventListener('mouseleave', () => applyNormalStyle(btn));
-
-                    btn.addEventListener('touchstart', () => applyPressedStyle(btn), { passive: true });
-                    btn.addEventListener('touchend', () => applyNormalStyle(btn));
-
-                    // Lancement instantané du scénario sans compte à rebours
-                    btn.onclick = () => playScenario(s.name);
-                    container.appendChild(btn);
-                });
-            } catch (e) { }
-        }
-
-        function applyNormalStyle(btn) {
-            if (design.btnNormalType === 'image') {
-                btn.style.backgroundImage = `url('${design.btnNormalValue}')`;
-                btn.style.backgroundSize = 'cover';
-                btn.style.backgroundColor = 'transparent';
-            } else {
-                btn.style.background = design.btnNormalValue || '#00ff88';
-                btn.style.backgroundImage = 'none';
-            }
-            applyCommonStyle(btn);
-        }
-
-        function applyPressedStyle(btn) {
-            if (design.btnPressedType === 'image') {
-                btn.style.backgroundImage = `url('${design.btnPressedValue}')`;
-                btn.style.backgroundSize = 'cover';
-                btn.style.backgroundColor = 'transparent';
-            } else {
-                btn.style.background = design.btnPressedValue || '#00cc66';
-                btn.style.backgroundImage = 'none';
-            }
-            applyCommonStyle(btn);
-        }
-
-        function applyCommonStyle(btn) {
-            btn.style.color = design.btnTextColor || '#000000';
-            btn.style.borderRadius = design.btnShape || '10px';
-            btn.style.fontFamily = design.btnFont || 'Arial, sans-serif';
-
-            const shadowColor = design.btnShadowColor || '#000000';
-            const glowColor = design.btnGlowColor || '#00ff88';
-
-            if (design.btnShadow === 'soft') {
-                btn.style.boxShadow = `0 4px 6px ${shadowColor}`;
-                btn.style.border = '2px solid rgba(255,255,255,0.2)';
-            } else if (design.btnShadow === 'hard') {
-                btn.style.boxShadow = `4px 4px 0px ${shadowColor}`;
-                btn.style.border = `2px solid ${shadowColor}`;
-            } else if (design.btnShadow === 'neon') {
-                btn.style.boxShadow = `0 0 15px ${glowColor}`;
-                btn.style.border = `1px solid ${glowColor}`;
-            } else {
-                btn.style.boxShadow = 'none';
-                btn.style.border = '2px solid rgba(255,255,255,0.2)';
-            }
-        }
-
-        async function playScenario(name) {
-            // L'appel part immédiatement vers ton ShowManager.cs
-            await fetch(`${API}/play/${encodeURIComponent(name)}`, { method: 'POST' });
-        }
-
-        async function checkStatus() {
-            try {
-                const res = await fetch(`${API}/status`);
+                const res = await fetch('/api/show/ip');
                 const data = await res.json();
-                document.getElementById('overlay').style.display = data.endOfNight ? 'flex' : 'none';
-            } catch (e) { }
-        }
+                const fullUrl = `http://${data.ip}:5000`;
 
-        async function sendHeartbeat() {
-            try { await fetch(`${API}/heartbeat`, { method: 'POST' }); } catch (e) { }
-        }
+                document.getElementById('ipDisplay').innerText = fullUrl;
+                const qrImg = document.getElementById('qrCodeImg');
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fullUrl)}`;
 
-        init();
+                qrImg.onload = () => {
+                    document.getElementById('qrLoading').style.display = 'none';
+                    qrImg.style.display = 'block';
+                };
+            } catch (e) {
+                document.getElementById('ipDisplay').innerText = "Erreur réseau";
+            }
+        }
+        loadConnectionInfo();
     </script>
 </body>
 </html>

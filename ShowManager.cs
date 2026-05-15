@@ -2,6 +2,12 @@
 using Newtonsoft.Json;
 using System.Net.Sockets;
 using System.Text;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MyShowController
 {
@@ -10,11 +16,14 @@ namespace MyShowController
         private MidiOut _midiOut;
         private bool _isPlaying = false;
         private VirtualDjService _vdjService = new VirtualDjService();
-        private readonly object _fileLock = new object(); // Sécurité pour l'écriture
+        private readonly object _fileLock = new object();
 
         public bool IsEmergency { get; private set; } = false;
         public bool IsEndOfNight { get; private set; } = false;
         public bool IsPlaying => _isPlaying;
+
+        // Propriété pour vérifier la connexion Sunlite
+        public bool IsSunliteConnected => _os2lClient != null && _os2lClient.Connected;
 
         private CancellationTokenSource _cts;
 
@@ -204,7 +213,7 @@ namespace MyShowController
                 {
                     if (_cts.Token.IsCancellationRequested) break;
 
-                    // --- ÉTAPE 1 : EXECUTION IMMEDIATE ---
+                    // --- ÉTAPE 1 : EXÉCUTION IMMÉDIATE ---
                     if (action.Type == "os2l") SendOs2l(action.CommandName);
                     else if (action.Type == "midi") TestMidi(action.Note, action.Velocity);
                     else if (action.Type == "vdj") await _vdjService.EnvoyerCommandeAsync(action.CommandName);

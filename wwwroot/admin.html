@@ -584,12 +584,12 @@
                 div.innerHTML = '';
                 allMacros.forEach(m => {
                     div.innerHTML += `<div class="macro-item">
-                            <div><strong style="color:#00d2ff;">${m.name}</strong><br><small style="color:#888;">${m.command}</small></div>
-                            <div style="display:flex; gap:5px;">
-                                <button onclick="editMacro('${m.name.replace(/'/g, "\\'")}')" class="btn-blue" style="padding:5px 10px;" title="Modifier">🖊️</button>
-                                <button onclick="delMacro('${m.name.replace(/'/g, "\\'")}')" class="btn-red" style="padding:5px 10px;" title="Supprimer">🗑️</button>
-                            </div>
-                        </div>`;
+                                <div><strong style="color:#00d2ff;">${m.name}</strong><br><small style="color:#888;">${m.command}</small></div>
+                                <div style="display:flex; gap:5px;">
+                                    <button onclick="editMacro('${m.name.replace(/'/g, "\\'")}')" class="btn-blue" style="padding:5px 10px;" title="Modifier">🖊️</button>
+                                    <button onclick="delMacro('${m.name.replace(/'/g, "\\'")}')" class="btn-red" style="padding:5px 10px;" title="Supprimer">🗑️</button>
+                                </div>
+                            </div>`;
                 });
             } catch (e) { }
         }
@@ -705,22 +705,29 @@
             if (type === 'wait') typeLabel = 'PAUSE';
 
             let htmlInputs = `<div style="flex:1;"><b>${typeLabel}</b> | Attente APRÈS:
-                <input type="number" class="delay-m" value="${min}" min="0" style="width:50px; padding:5px; text-align:center;"> m
-                <input type="number" class="delay-s" value="${sec}" min="0" max="59" style="width:50px; padding:5px; text-align:center;"> s
-                `;
+                    <input type="number" class="delay-m" value="${min}" min="0" style="width:50px; padding:5px; text-align:center;"> m
+                    <input type="number" class="delay-s" value="${sec}" min="0" max="59" style="width:50px; padding:5px; text-align:center;"> s
+                    `;
 
             if (type === 'os2l') {
                 const cmd = data ? data.commandName : "";
-                htmlInputs += ` ➔ Cmd: <input type="text" class="cmd" value="${cmd}" style="width:150px">`;
+                const safeCmd = cmd.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                htmlInputs += ` ➔ Cmd: <input type="text" class="cmd" value="${safeCmd}" style="width:150px">`;
             } else if (type === 'vdj') {
                 const cmd = data ? data.commandName : "";
+                const safeCmd = cmd.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
                 let options = `<option value="">-- Mode Libre --</option>`;
-                allMacros.forEach(m => options += `<option value='${m.command.replace(/'/g, "&#39;")}'>${m.name}</option>`);
+                allMacros.forEach(m => {
+                    let isSelected = (m.command === cmd) ? "selected" : "";
+                    let safeMacroCmd = m.command.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    options += `<option value="${safeMacroCmd}" ${isSelected}>${m.name}</option>`;
+                });
 
                 htmlInputs += ` ➔ Cmd: <select style="width:150px; display:inline-block;" onchange="this.nextElementSibling.value = this.value">
-                                ${options}
-                             </select>
-                             <input type="text" class="cmd" value="${cmd}" placeholder="Commande..." style="width:150px">`;
+                                    ${options}
+                                 </select>
+                                 <input type="text" class="cmd" value="${safeCmd}" placeholder="Commande..." style="width:150px">`;
             } else if (type === 'midi') {
                 const note = data ? data.note : (lastTestedNote || 1);
                 htmlInputs += ` ➔ Note: <input type="number" class="note" value="${note}" style="width:60px; padding:5px;">`;
@@ -731,12 +738,12 @@
             htmlInputs += `</div>`;
 
             let htmlButtons = `<div style="display:flex; align-items:center; gap:10px;">
-                    <div style="display:flex; flex-direction:column; gap:2px;">
-                        <button onclick="moveUp(this)" style="background:#444; border:none; color:white; cursor:pointer; padding:3px 8px; border-radius:3px; font-size:10px;" title="Monter">▲</button>
-                        <button onclick="moveDown(this)" style="background:#444; border:none; color:white; cursor:pointer; padding:3px 8px; border-radius:3px; font-size:10px;" title="Descendre">▼</button>
-                    </div>
-                    <button onclick="this.closest('div[data-type]').remove()" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold; font-size:18px;" title="Supprimer">X</button>
-                </div>`;
+                        <div style="display:flex; flex-direction:column; gap:2px;">
+                            <button onclick="moveUp(this)" style="background:#444; border:none; color:white; cursor:pointer; padding:3px 8px; border-radius:3px; font-size:10px;" title="Monter">▲</button>
+                            <button onclick="moveDown(this)" style="background:#444; border:none; color:white; cursor:pointer; padding:3px 8px; border-radius:3px; font-size:10px;" title="Descendre">▼</button>
+                        </div>
+                        <button onclick="this.closest('div[data-type]').remove()" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold; font-size:18px;" title="Supprimer">X</button>
+                    </div>`;
 
             div.innerHTML = htmlInputs + htmlButtons;
             document.getElementById('actionsList').appendChild(div);
@@ -769,13 +776,13 @@
                 const safeName = s.name.replace(/'/g, "\\'");
                 const safeJson = JSON.stringify(s).replace(/'/g, "&#39;");
                 div.innerHTML += `<div class="scenar-item">
-                        <span>${s.name} <small>(${s.usageCount})</small></span>
-                        <div>
-                            <button onclick="playS('${safeName}')" class="btn-green" title="Lancer">▶️</button>
-                            <button onclick='editS(${safeJson})' class="btn-blue" title="Modifier">🖊️</button>
-                            <button onclick="delS('${safeName}')" class="btn-red" title="Supprimer">🗑️</button>
-                        </div>
-                    </div>`;
+                            <span>${s.name} <small>(${s.usageCount})</small></span>
+                            <div>
+                                <button onclick="playS('${safeName}')" class="btn-green" title="Lancer">▶️</button>
+                                <button onclick='editS(${safeJson})' class="btn-blue" title="Modifier">🖊️</button>
+                                <button onclick="delS('${safeName}')" class="btn-red" title="Supprimer">🗑️</button>
+                            </div>
+                        </div>`;
             });
         }
 

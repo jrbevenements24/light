@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace MyShowController.Controllers
 {
@@ -15,61 +19,52 @@ namespace MyShowController.Controllers
 
         public ShowController(ShowManager manager) { _manager = manager; }
 
-        // --- NOUVELLE LOGIQUE RÉSEAU (Recherche 192.168.x.x) ---
-        [HttpGet("network")]
+        // --- RECHERCHE IP POUR ACCÈS MOBILE (Route : /api/show/ip) ---
+        [HttpGet("ip")]
         public IActionResult GetNetworkInfo()
         {
-            string bestIP = "localhost";
-
+            string bestIP = "127.0.0.1";
             try
             {
-                // On parcourt toutes les cartes réseau (Wi-Fi, Ethernet)
                 foreach (var netInterface in NetworkInterface.GetAllNetworkInterfaces())
                 {
-                    // On ne veut que les cartes actives et pas les trucs bizarres (Loopback)
                     if (netInterface.OperationalStatus == OperationalStatus.Up &&
                         netInterface.NetworkInterfaceType != NetworkInterfaceType.Loopback)
                     {
                         var props = netInterface.GetIPProperties();
                         foreach (var addr in props.UnicastAddresses)
                         {
-                            // On cherche une IPv4 (ex: 192.168.1.15)
                             if (addr.Address.AddressFamily == AddressFamily.InterNetwork)
                             {
                                 string ip = addr.Address.ToString();
-
-                                // PRIORITÉ 1 : Les adresses locales classiques (Box internet)
-                                if (ip.StartsWith("192.168."))
-                                {
-                                    return Ok(new { ip = ip });
-                                }
-
-                                // PRIORITÉ 2 : Les adresses type réseau privé (10.x.x.x)
-                                if (ip.StartsWith("10."))
-                                {
-                                    bestIP = ip;
-                                }
-
-                                // Si on n'a rien de mieux, on garde celle-ci
-                                if (bestIP == "localhost") bestIP = ip;
+                                if (ip.StartsWith("192.168.")) return Ok(new { ip = ip });
+                                if (ip.StartsWith("10.")) bestIP = ip;
+                                if (bestIP == "127.0.0.1") bestIP = ip;
                             }
                         }
                     }
                 }
             }
             catch { }
-
             return Ok(new { ip = bestIP });
         }
 
-        // --- RESTANT DU CODE (Inchangé) ---
         [HttpGet("dashboard")]
         public IActionResult GetDashboard()
         {
             var scenarios = _manager.LoadScenarios();
             var totalClicks = scenarios.Sum(s => s.UsageCount);
-            var ranking = scenarios.OrderByDescending(s => s.UsageCount).Select(s => new { name = s.Name, count = s.UsageCount }).ToList();
-            return Ok(new { sunliteConnected = _manager.IsSunliteConnected(), publicConnected = _manager.IsPublicPageOnline(), totalClicks = totalClicks, ranking = ranking });
+            var ranking = scenarios.OrderByDescending(s => s.UsageCount)
+                                   .Select(s => new { name = s.Name, count = s.UsageCount })
+                                   .ToList();
+
+            return Ok(new
+            {
+                sunliteConnected = _manager.IsSunliteConnected,
+                publicConnected = _manager.IsPublicPageOnline(),
+                totalClicks = totalClicks,
+                ranking = ranking
+            });
         }
 
         [HttpPost("resetstats")] public IActionResult ResetStats() { _manager.ResetAllStats(); return Ok(); }
@@ -105,5 +100,10 @@ namespace MyShowController.Controllers
 
         [HttpPost("testmidi")] public IActionResult TestMidi([FromBody] MidiReq req) { _manager.TestMidi(req.Note, 127); return Ok(); }
         [HttpPost("heartbeat")] public IActionResult Heartbeat() { _manager.ReceiveHeartbeat(); return Ok(); }
+
+        // --- ROUTES MACROS VIRTUAL DJ ---
+        [HttpGet("macros")] public IActionResult GetMacros() => Ok(_manager.LoadMacros());
+        [HttpPost("macro")] public IActionResult SaveMacro([FromBody] VdjMacro m) { _manager.SaveMacro(m); return Ok(); }
+        [HttpDelete("macro/{name}")] public IActionResult DeleteMacro([FromRoute] string name) { if (string.IsNullOrWhiteSpace(name)) return BadRequest("Nom requis"); _manager.DeleteMacro(WebUtility.UrlDecode(name)); return Ok(); }
     }
 }
